@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IT Lernfragen Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f; --surface: #12121a; --surface2: #1a1a26; --border: #2a2a3d;
+    --accent: #6c63ff; --accent2: #ff6584; --green: #00e5a0; --red: #ff4d6d;
+    --text: #e8e8f0; --muted: #7070a0; --glow: rgba(108,99,255,0.15);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg); color: var(--text);
+    font-family: 'DM Mono', monospace;
+    min-height: 100vh; display: flex; flex-direction: column;
+    align-items: center; padding: 0 16px 60px; overflow-x: hidden;
+  }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 48px 48px; opacity: 0.2; pointer-events: none; z-index: 0;
+  }
+  .wrapper { width: 100%; max-width: 720px; position: relative; z-index: 1; }
+  header { text-align: center; padding: 48px 0 32px; }
+  header .badge {
+    display: inline-block; background: var(--glow); border: 1px solid var(--accent);
+    color: var(--accent); font-size: 0.7rem; letter-spacing: 0.15em;
+    text-transform: uppercase; padding: 4px 14px; border-radius: 20px; margin-bottom: 16px;
+  }
+  header h1 {
+    font-family: 'Syne', sans-serif; font-size: clamp(2rem,5vw,3.2rem); font-weight: 800;
+    line-height: 1.1; background: linear-gradient(135deg, #fff 30%, var(--accent));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 8px;
+  }
+  header p { color: var(--muted); font-size: 0.85rem; }
+  .progress-bar-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; height: 8px; overflow: hidden; margin-bottom: 8px; }
+  .progress-bar { height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 8px; transition: width 0.4s cubic-bezier(.4,0,.2,1); }
+  .progress-info { display: flex; justify-content: space-between; color: var(--muted); font-size: 0.72rem; margin-bottom: 24px; }
+  .card {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 16px;
+    padding: 32px; margin-bottom: 20px; animation: fadeUp 0.35s ease both;
+    position: relative; overflow: hidden;
+  }
+  .card::before {
+    content: ''; position: absolute; top: -1px; left: -1px; right: -1px; height: 2px;
+    background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 16px 16px 0 0;
+  }
+  @keyframes fadeUp { from { opacity:0; transform:translateY(18px); } to { opacity:1; transform:translateY(0); } }
+  .q-number { font-size: 0.7rem; letter-spacing: 0.12em; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; }
+  .q-text { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 600; line-height: 1.55; color: var(--text); margin-bottom: 24px; }
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); cursor: pointer; font-family: 'DM Mono', monospace; font-size: 0.88rem;
+    padding: 14px 18px; text-align: left; transition: border-color .2s, background .2s, transform .1s;
+    display: flex; align-items: flex-start; gap: 12px; line-height: 1.5;
+  }
+  .option-btn .opt-letter {
+    min-width: 22px; height: 22px; border-radius: 6px; border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center; font-size: 0.72rem;
+    font-weight: 500; color: var(--muted); transition: background .2s, color .2s, border-color .2s;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(108,99,255,0.08); transform: translateX(3px); }
+  .option-btn:hover:not(:disabled) .opt-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .option-btn:disabled { cursor: not-allowed; }
+  .option-btn.correct { border-color: var(--green); background: rgba(0,229,160,0.08); }
+  .option-btn.correct .opt-letter { background: var(--green); border-color: var(--green); color: #000; }
+  .option-btn.wrong { border-color: var(--red); background: rgba(255,77,109,0.08); }
+  .option-btn.wrong .opt-letter { background: var(--red); border-color: var(--red); color: #fff; }
+  .note-box { margin-top: 16px; padding: 12px 16px; background: rgba(108,99,255,0.07); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; font-size: 0.82rem; color: var(--muted); line-height: 1.6; }
+  .note-box strong { color: var(--text); }
+  .answered-correct { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--green); margin-top: 16px; }
+  .answered-wrong { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; color: var(--red); margin-top: 16px; }
+  .btn-next {
+    width: 100%; padding: 15px; background: linear-gradient(135deg, var(--accent), #8b5cf6);
+    border: none; border-radius: 10px; color: #fff; font-family: 'Syne', sans-serif;
+    font-size: 0.95rem; font-weight: 700; letter-spacing: 0.05em; cursor: pointer;
+    transition: opacity .2s, transform .15s; margin-top: 8px;
+  }
+  .btn-next:hover { opacity: 0.92; transform: translateY(-1px); }
+  #result-screen { display: none; text-align: center; padding-top: 20px; }
+  .score-ring { width: 160px; height: 160px; margin: 0 auto 24px; position: relative; }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+  .score-ring .ring-fill { fill: none; stroke-width: 10; stroke-linecap: round; transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1); }
+  .score-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .score-pct { font-family: 'Syne', sans-serif; font-size: 2.4rem; font-weight: 800; line-height: 1; }
+  .score-label { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+  .result-title { font-family: 'Syne', sans-serif; font-size: 1.8rem; font-weight: 800; margin-bottom: 8px; }
+  .result-sub { color: var(--muted); font-size: 0.85rem; margin-bottom: 32px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 32px; }
+  .stat-box { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 12px; }
+  .stat-box .val { font-family: 'Syne', sans-serif; font-size: 1.6rem; font-weight: 800; }
+  .stat-box .lbl { font-size: 0.7rem; color: var(--muted); margin-top: 4px; }
+  .stat-box.cs .val { color: var(--green); } .stat-box.ws .val { color: var(--red); }
+  .btn-restart { width: 100%; padding: 15px; background: var(--surface); border: 1px solid var(--accent); border-radius: 10px; color: var(--accent); font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; cursor: pointer; transition: background .2s; margin-bottom: 12px; }
+  .btn-restart:hover { background: var(--glow); }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <header>
+    <div class="badge">IT Grundlagen</div>
+    <h1>Lernfragen Quiz</h1>
+    <p>Netzwerke · Datensicherung · RAID · USV · IP-Adressen</p>
+  </header>
+  <div id="quiz-screen">
+    <div class="progress-bar-wrap"><div class="progress-bar" id="progress-bar"></div></div>
+    <div class="progress-info"><span id="q-counter">Frage 1 von 80</span><span id="score-counter">✓ 0 &nbsp; ✗ 0</span></div>
+    <div class="card" id="question-card">
+      <div class="q-number" id="q-number"></div>
+      <div class="q-text" id="q-text"></div>
+      <div id="q-body"></div>
+    </div>
+    <button class="btn-next" id="btn-next" style="display:none" onclick="nextQ()">Weiter →</button>
+  </div>
+  <div id="result-screen">
+    <div class="score-ring">
+      <svg viewBox="0 0 100 100" width="160" height="160">
+        <circle class="ring-bg" cx="50" cy="50" r="42"/>
+        <circle class="ring-fill" id="ring-fill" cx="50" cy="50" r="42"/>
+      </svg>
+      <div class="score-inner"><div class="score-pct" id="score-pct"></div><div class="score-label">Ergebnis</div></div>
+    </div>
+    <div class="result-title" id="result-title"></div>
+    <div class="result-sub" id="result-sub"></div>
+    <div class="stats-grid">
+      <div class="stat-box cs"><div class="val" id="res-correct"></div><div class="lbl">Richtig</div></div>
+      <div class="stat-box ws"><div class="val" id="res-wrong"></div><div class="lbl">Falsch</div></div>
+      <div class="stat-box"><div class="val" style="color:var(--accent)" id="res-total"></div><div class="lbl">Gesamt</div></div>
+    </div>
+    <button class="btn-restart" onclick="restartQuiz()">⟳ Nochmal spielen</button>
+    <button class="btn-restart" onclick="restartShuffle()" style="border-color:var(--accent2);color:var(--accent2)">⟳ Zufällige Reihenfolge</button>
+  </div>
+</div>
+<script>
+const LETTERS = ['A','B','C','D'];
+const QUESTIONS = [
+  // 1
+  { q:"Wie erfolgt der Datenverkehr im Internet?", opts:["Leitungsvermittlung","Paketvermittlung","Drahtlose Übertragung","Modemvermittlung"], c:1 },
+  // 2
+  { q:"Was ist Colocation?", opts:["Ein eigenes Netz außerhalb des Internets","Die Spiegelung von Daten zwischen Rechenzentren","Das Vermieten von Stellplätzen oder Einschubplätzen in Racks in gut vernetzten Rechenzentren","Die Übernahme der Stromversorgung durch externe Dienstleister"], c:2 },
+  // 3
+  { q:"Welcher Dienst ermöglicht die Dateiübertragung zwischen Computern in einem Netzwerk?", opts:["HTTP","FTP","DNS","DHCP"], c:1 },
+  // 4
+  { q:"Welcher Netzwerkdienst wird für die Überwachung und Verwaltung von Netzwerkgeräten verwendet?", opts:["DNS","FTP","SNMP","HTTP"], c:2 },
+  // 5
+  { q:"Welche Lichtwellenleiterart wird dargestellt, wenn Lichtstrahlen im Zickzack verlaufen?", opts:["Monomode","Stufenindex-Multimode","Gradientenindex"], c:1 },
+  // 6
+  { q:"Welche Lichtwellenleiterart wird dargestellt, wenn ein gerader Lichtstrahl zu sehen ist?", opts:["Monomode","Stufenindex-Multimode","Gradientenindex"], c:0 },
+  // 7
+  { q:"Was repräsentiert das CRC in einem Ethernet-Frame?", opts:["Eine Fehlerprüfsumme","Eine Adressierungsinformation","Eine Längenangabe","Eine Typinformation"], c:0 },
+  // 8
+  { q:"Wie lange dauert die Übertragung von 500 MB bei einer Bandbreite von 100 MB/s?", opts:["5 s","10 s","50 s","1 s"], c:0 },
+  // 9
+  { q:"Welche Topologie ist am einfachsten zu installieren?", opts:["Ringtopologie","Maschentopologie","Sterntopologie","Baumtopologie"], c:2 },
+  // 10
+  { q:"Welche Topologie verwendet eine zentrale Leitung, an die alle Knoten angeschlossen sind?", opts:["Ringtopologie","Maschentopologie","Bus-Topologie","Baumtopologie"], c:2 },
+  // 11 – Bringen Sie die Beschriftung des TA in die richtige Reihenfolge
+  { q:"Bringen Sie die Beschriftung des TA in die richtige Reihenfolge. Was steht an Position 3?", opts:["Gebäudebezeichnung","Etage","Nummer des Stockwerkverteilers","Patchfeldbezeichnung"], c:2, note:"Korrekte Reihenfolge: 1 Gebäudebezeichnung · 2 Etage · 3 Nummer des Stockwerkverteilers · 4 Patchfeldbezeichnung · 5 Steckplatz/Port" },
+  // 12
+  { q:"Welche Schicht des OSI-Modells ist für die Segmentierung von Daten verantwortlich?", opts:["Präsentationsschicht","Transportschicht","Vermittlungsschicht","Sitzungsschicht"], c:1 },
+  // 13
+  { q:"Warum ist die Datensicherung laut Datenrettungsunternehmen für Unternehmen überlebenswichtig?", opts:["Weil sie Kosten reduziert","Weil sie den Umsatz steigert","Weil Unternehmen nach Datenverlust oft in Konkurs gehen","Weil sie die Produktivität fördert"], c:2 },
+  // 14
+  { q:"Welche Methode eignet sich besonders für Unternehmen mit mehreren Niederlassungen und mehreren Rechenzentren?", opts:["Bandsicherung","Cloud-Backup","Off-Premises-Backup","Inkrementelles Backup"], c:2 },
+  // 15
+  { q:"Was wird durch ein Speicherabbild-Backup gesichert?", opts:["Nur gelöschte Dateien","Das gesamte Dateisystem inklusive gelöschter Dateien","Nur aktuelle Dateien","Dateien in der Cloud"], c:1 },
+  // 16
+  { q:"Welche Bedeutung hat die Entfernung von mindestens 3 km zwischen zwei Rechenzentren beim Off-Premises-Backup?", opts:["Es erleichtert die Wartung der Server","Es verhindert, dass eine Katastrophe an einem Standort auch den anderen betrifft","Es ermöglicht schnelle Datenübertragung","Es reduziert die Kosten der Datensicherung"], c:1 },
+  // 17
+  { q:"Wofür eignet sich das Voll-Backup besonders?", opts:["Für große Datenmengen","Zur Sicherung aller Dateien einer Platte","Für Unternehmen mit nur einer Niederlassung","Zur Sicherung von geänderten Dateien"], c:1 },
+  // 18
+  { q:"Warum ist die Aufbewahrung von Bändern außerhalb des Serverraums wichtig?", opts:["Um die Bänder vor Diebstahl zu schützen","Um sicherzustellen, dass ein Feuer im Rechenzentrum die Bänder nicht zerstört","Um den Zugriff auf die Bänder zu erleichtern","Um Platz im Serverraum zu sparen"], c:1 },
+  // 19
+  { q:"Was übernimmt der Cloud-Anbieter beim Cloud-Backup?", opts:["Die Datensicherung","Die Wartung der Bänder","Die Wartung der Server, Klimaanlage und Stromversorgung","Die Auswahl der zu sichernden Dateien"], c:2 },
+  // 20
+  { q:"Welche Methode erfordert viele Bänder mit relativ wenig Daten?", opts:["Voll-Backup","Inkrementelles Backup","Differenzielles Backup","Bandsicherung"], c:1 },
+  // 21
+  { q:"Warum ist das Testen der Datensicherung und Wiederherstellung von großer Bedeutung?", opts:["Um die Backup-Zeit zu reduzieren","Um sicherzustellen, dass genau die gesicherten Daten auch wiederhergestellt werden können","Um die Kosten der Datensicherung zu überprüfen","Um die Wartung der Server zu erleichtern"], c:1 },
+  // 22
+  { q:"Was ist die Hauptursache für Datenverlust laut Datenrettungsunternehmen?", opts:["RAID-Systeme","SSD-Platten","Festplattencrash","Technische Defekte"], c:2 },
+  // 23
+  { q:"Welche Methode empfiehlt sich besonders für Unternehmen mit nur einer Niederlassung?", opts:["Off-Premises-Backup","Cloud-Backup","Bandsicherung","Inkrementelles Backup"], c:0 },
+  // 24
+  { q:"Was übernimmt der Bandroboter bei der Bandsicherung?", opts:["Die Auswahl der zu sichernden Dateien","Die Wartung der Bänder","Das automatische Sichern und Wechseln von Bandkassetten","Die Sicherung in der Cloud"], c:2 },
+  // 25
+  { q:"Welche Methode eignet sich für Unternehmen jeder Größe und wird immer beliebter?", opts:["Bandsicherung","Off-Premises-Backup","Cloud-Backup","Speicherabbild-Backup"], c:2 },
+  // 26
+  { q:"Was ist der Zweck eines inkrementellen Backups?", opts:["Alle Dateien einer Platte sichern","Nur geänderte Dateien seit der letzten Vollsicherung oder inkrementellen Sicherung sichern","Das gesamte Dateisystem mit gelöschten Dateien sichern","Nur Dateien in der Cloud sichern"], c:1 },
+  // 27
+  { q:"Welches RAID-Level zeichnet sich durch Striping aus, bei dem Daten gleichmäßig über mehrere Festplatten verteilt werden?", opts:["RAID 1","RAID 5","RAID 0","RAID 6"], c:2 },
+  // 28
+  { q:"Was ist das Hauptmerkmal von RAID 1?", opts:["Striping","Datensicherheit durch Spiegelung","Block-Level Striping mit Paritätsinformationen","Doppelte Parität"], c:1 },
+  // 29
+  { q:"Welches RAID-Level kombiniert Striping und einfache Paritätsinformationen für Datensicherheit und Leistungssteigerung?", opts:["RAID 5","RAID 6","RAID 1","RAID 0"], c:0 },
+  // 30
+  { q:"Was ist der Unterschied zwischen RAID 5 und RAID 6 hinsichtlich der Paritätsinformationen?", opts:["RAID 5 verwendet keine Paritätsinformationen.","RAID 6 hat doppelt so viele Paritätsinformationen wie RAID 5.","RAID 5 verwendet Block-Level Striping, RAID 6 doppelte Parität.","RAID 6 bietet keine Datensicherheit durch Paritätsinformationen."], c:1 },
+  // 31
+  { q:"Ein RAID-0-System besteht aus drei Festplatten mit jeweils 500 GB. Wie hoch ist die Nettospeicherkapazität?", opts:["500 GB","1 TB","1,5 TB","2 TB"], c:2 },
+  // 32
+  { q:"In einem RAID-1-System werden zwei Festplatten mit jeweils 1 TB verwendet. Wie hoch ist die Nettospeicherkapazität?", opts:["1 TB","2 TB","0,5 TB","500 GB"], c:0 },
+  // 33
+  { q:"Ein RAID-5-System besteht aus vier Festplatten mit jeweils 2 TB. Wie hoch ist die Nettospeicherkapazität?", opts:["4 TB","6 TB","8 TB","2 TB"], c:1 },
+  // 34
+  { q:"In einem RAID-6-System sind fünf Festplatten mit jeweils 1,5 TB installiert. Wie hoch ist die Nettospeicherkapazität?", opts:["4,5 TB","6 TB","5,5 TB","7,5 TB"], c:0 },
+  // 35
+  { q:"Was ist RAID und wofür wird es in den meisten Fällen verwendet?", opts:["Ein kabelloses Netzwerkprotokoll","Ein Dateisystem für SSDs","Ein Verbund aus Festplatten oder SSDs zur Datenredundanz und erhöhten Zugriffsgeschwindigkeit","Ein Videokompressionsalgorithmus"], c:2 },
+  // 36
+  { q:"Was ist der Hauptzweck von RAID 0?", opts:["Datenredundanz","Erhöhung der Zugriffsgeschwindigkeit","Hohe Sicherheit gegen Laufwerksausfall","Spiegelung der Daten auf mehreren Laufwerken"], c:1 },
+  // 37
+  { q:"Welches RAID-Level bietet eine hohe Sicherheit gegen Laufwerksausfall, geht jedoch mit hohen Kosten einher?", opts:["RAID 0","RAID 1","RAID 5","RAID 6"], c:1 },
+  // 38
+  { q:"Welche Aussage trifft am ehesten auf RAID 5 zu?", opts:["Daten werden auf mehreren Laufwerken verteilt, um die Transferrate zu steigern.","Die Daten werden gleichzeitig auf mehreren Laufwerken gespiegelt.","Verteilung der Daten auf mindestens drei Platten, wobei Redundanzinformationen verteilt gespeichert werden.","Ein Verbund aus mehreren Einzellaufwerken ohne Redundanz."], c:2 },
+  // 39
+  { q:"Was ist der Unterschied zwischen RAID 5 und RAID 6 in Bezug auf die Sicherheit gegen Laufwerksausfälle?", opts:["RAID 5 kann einen Laufwerksausfall kompensieren, RAID 6 nicht.","RAID 6 kann den Ausfall von zwei Laufwerken kompensieren, RAID 5 nicht.","RAID 5 und RAID 6 bieten die gleiche Sicherheit.","Weder RAID 5 noch RAID 6 bieten Sicherheit gegen Laufwerksausfälle."], c:1 },
+  // 40
+  { q:"Was ist JBOD und wie unterscheidet es sich von RAID?", opts:["JBOD ist ein RAID-Level mit Redundanz.","JBOD ist ein RAID-Modus, der Daten auf mehreren Laufwerken verteilt.","JBOD fasst mehrere Einzellaufwerke zu einem zusammen, ohne Redundanz.","JBOD ist ein Synonym für RAID 0."], c:2 },
+  // 41
+  { q:"Welchen Vorteil verspricht RAID 0 für Windows-Nutzer?", opts:["Höhere Datensicherheit","Erheblich schnellere Windows-Startzeiten und Anwendungsbenchmarks","Reduzierte Kosten","Einfachere Verwaltung von Speicherplatz"], c:1 },
+  // 42
+  { q:"Was ist die Nettokapazität eines RAID-5-Verbunds aus drei Laufwerken in Bezug auf die Gesamtkapazität?", opts:["33 %","50 %","66 %","80 %"], c:2 },
+  // 43
+  { q:"Was ist die Nettokapazität eines RAID-6-Verbunds aus vier Laufwerken in Bezug auf die Gesamtkapazität?", opts:["33 %","50 %","66 %","80 %"], c:1 },
+  // 44
+  { q:"Welcher RAID-Level bietet höhere Sicherheit gegen den Ausfall von zwei Laufwerken?", opts:["RAID 1","RAID 5","RAID 6","RAID 0"], c:2 },
+  // 45
+  { q:"Welche Komponente übernimmt bei Desktop-PCs die Berechnungen für RAID-Verbünde?", opts:["CPU","SATA-Controller","GPU","USB-Controller"], c:0 },
+  // 46
+  { q:"Welche Komponenten sind in einfachen unterbrechungssicheren Stromversorgungen (USVs) enthalten?", opts:["Blei-Säure-Akku, Wechselrichter, Spannungsüberwachung","Lithium-Ionen-Akku, Solarzellen, Frequenzumformer","Alkaline-Batterien, Gleichstrommotor, Phasenwechsler","Wasserkraftgenerator, Kondensator, Lichtbogenlampe"], c:0 },
+  // 47
+  { q:"Was übernimmt im Normalbetrieb bei aktuellen USV-Geräten die Kontrolle der Netzspannung?", opts:["Schütz","Mikrocontroller","Relais","Spannungsüberwachung"], c:1 },
+  // 48
+  { q:"Wie lange dauert der Umschaltvorgang einer USV im Stützbetrieb in der Regel?", opts:["1 bis 5 Sekunden","10 bis 20 Millisekunden","4 bis 10 Millisekunden","30 bis 60 Sekunden"], c:2 },
+  // 49
+  { q:"Welches Bauteil erzeugt aus der Gleichspannung des Akkus 230 Volt Wechselspannung in einer USV?", opts:["Transformator","Thyristor","Wechselrichter","Schaltnetzteil"], c:2 },
+  // 50
+  { q:"Welcher USV-Typ kann kleinere Schwankungen der Netzspannung ausgleichen, ohne in den Stützbetrieb zu wechseln?", opts:["Standby- oder VFD-Modell","Voltage Independent (VI) / Line Interactive","Online-Double-Conversion (VFI)","Offline-USV"], c:1 },
+  // 51
+  { q:"Welche USV-Klasse schützt nur gegen Netzausfälle und kurzzeitige Spannungsschwankungen, gleicht jedoch keine Unter- und Überspannungen aus?", opts:["Voltage Independent (VI)","Online-Double-Conversion (VFI)","Voltage and Frequency Dependent (VFD) / Standby-Modell","Line Interactive"], c:2 },
+  // 52
+  { q:"Welche USV-Technik gilt als echter Stromgenerator und versorgt angeschlossene Verbraucher ständig ohne Einschränkungen mit Netzspannung?", opts:["Standby- oder Offline-USV","Voltage Independent (VI) / Line Interactive","Voltage and Frequency Independent (VFI) / Online-Double-Conversion","Trapez-Wechselrichter"], c:2 },
+  // 53
+  { q:"Welche USV-Typen eignen sich besonders für hochsensible Bereiche in der Computer- und Kommunikationstechnik?", opts:["Standby- oder VFD-Modelle","Voltage Independent (VI) / Line Interactive","Voltage and Frequency Independent (VFI) / Online-Double-Conversion","Trapez-Wechselrichter"], c:2 },
+  // 54
+  { q:"Welche USV-Klasse hat einen Wirkungsgrad von etwa 85 Prozent und ist teurer als andere Typen?", opts:["Voltage Independent (VI)","Online-Double-Conversion (VFI)","Voltage and Frequency Dependent (VFD) / Standby-Modell","Line Interactive"], c:1 },
+  // 55
+  { q:"Wie lange beträgt die Lebensdauer der Akkus bei Dauerwandler-USVs aufgrund der Dauerbelastung?", opts:["1 bis 2 Jahre","3 bis 4 Jahre","5 bis 7 Jahre","8 bis 10 Jahre"], c:1 },
+  // 56
+  { q:"Was ist die Hauptaufgabe einer USV im Normalbetrieb?", opts:["Erzeugung von Sinusspannung","Bereitstellung von Netzspannung bei Stromausfall","Kontrolle der Netzspannung und Aufladung des Akkus","Ausgleich von Frequenzänderungen"], c:2 },
+  // 57
+  { q:"Was gehört NICHT zu den Störungen, vor denen eine USV schützt?", opts:["Oberschwingungen","Elektromagnetische Einflüsse","Blitzeinschläge","Mechanische Vibrationen"], c:3 },
+  // 58
+  { q:"Welche Komponente in einer USV sorgt dafür, dass bei Netzausfall die Last aus der Batterie gespeist wird?", opts:["Mikrocontroller","Wechselrichter","Bypass","Spannungsüberwachung"], c:1, note:"Im Original wurde diese Frage falsch beantwortet (0/1). Die korrekte Antwort ist: Wechselrichter." },
+  // 59
+  { q:"Was ist die Funktion eines netzinteraktiven USVs im Vergleich zu einer Standby-USV?", opts:["Schutz vor Netzausfall und kurzzeitigen Spannungsschwankungen","Konstanter Betrieb ohne Umschaltzeit bei Netzausfall","Filterung von Störungen und Ausgleich von Spannungsschwankungen","Unterstützung bei Frequenzänderungen"], c:2 },
+  // 60
+  { q:"Was ist ein Merkmal von Offline-USVs im Vergleich zu anderen USV-Typen?", opts:["Umschaltzeit von 2 bis 4 Millisekunden","Liefern in der Regel ein stufenförmiges Ausgangssignal","Schützen vor Unterspannung und Überspannung","Hoher Wirkungsgrad von 95 bis 98 Prozent"], c:0 },
+  // 61
+  { q:"Was ist ein typischer Anwendungsfall für Standby- oder Offline-USVs?", opts:["Server in Rechenzentren","Krankenhäuser und Industrie","Einzel-PCs und Bürorechner","Hochverfügbarkeitsrechner"], c:2 },
+  // 62
+  { q:"Auf welche Backup-Strategie trifft zu: »Zur Wiederherstellung wird stets nur ein Backup benötigt.«", opts:["Vollbackup","Inkrementelles Backup","Differentielles Backup"], c:0 },
+  // 63
+  { q:"Auf welche Backup-Strategie trifft zu: »Diese Strategie hat den höchsten Speicherplatzbedarf.«", opts:["Vollbackup","Inkrementelles Backup","Differentielles Backup"], c:2 },
+  // 64
+  { q:"Auf welche Backup-Strategie trifft zu: »Es wurden drei Sicherungen für die Wiederherstellung benötigt.«", opts:["Vollbackup","Inkrementelles Backup","Differentielles Backup"], c:1 },
+  // 65 – Inkrementelles Backup Rechenaufgabe
+  { q:"Vollbackup Tag 1: 10 GB, Änderungen 20 %/Tag, keine neuen Daten. Welche Datenmenge hat das inkrementelle Backup an Tag 3?", opts:["1 GB","2 GB","4 GB","8 GB"], c:1, note:"Tag 1: 10 GB (Voll), Tag 2: 2 GB, Tag 3: 2 GB, Tag 4: 2 GB – immer 20 % von 10 GB, da sich jeweils nur der heutige Stand ändert." },
+  // 66 – Differentielles Backup Rechenaufgabe
+  { q:"Vollbackup Tag 1: 10 GB, Datenmenge verdoppelt sich täglich, vorhandene Daten ändern sich nicht. Welche Datenmenge hat das differentielle Backup an Tag 3?", opts:["10 GB","20 GB","30 GB","40 GB"], c:2, note:"Tag 1: 10 GB (Voll), Tag 2: 10 GB (neu), Tag 3: 30 GB (10+20 neu), Tag 4: 70 GB (10+20+40 neu)." },
+  // 67 – RAID-Zuordnung
+  { q:"Ordnen Sie RAID-Level und Schlüsselwort: Welches Schlüsselwort gehört zu RAID 0?", opts:["Mirroring","Striping","Parity","Redundanz"], c:1, note:"RAID 0 → Striping · RAID 1 → Mirroring · RAID 5 → Parity" },
+  // 68 – Mindestanzahl Festplatten
+  { q:"Wie viele Festplatten benötigen Sie mindestens für RAID 5?", opts:["2","3","4","5"], c:1, note:"RAID 0: mind. 2 · RAID 1: mind. 2 · RAID 5: mind. 3" },
+  // 69 – Nettospeicher mit gemischten Platten
+  { q:"Sie verfügen über vier 1000-GB- und eine 800-GB-Festplatte. Wie hoch ist der Nettospeicher bei RAID 0 (alle 5 Platten)?", opts:["4000 GB","4800 GB","5000 GB","3200 GB"], c:1, note:"RAID 0: Summe aller Platten = 4×1000 + 800 = 4800 GB · RAID 1: kleinste Platte × 2 = 1600 GB · RAID 5: (Summe − kleinste) = 4000 GB" },
+  // 70 – 3-2-1-Regel
+  { q:"Was beschreibt die 3-2-1-Backup-Regel? Ordnen Sie zu: Was steht die »1« für?", opts:["1 Kopie der Daten","1 Datenträger-Typ","1 Backup an einem separaten (externen) Ort","1 Cloud-Sicherung"], c:2, note:"3 = 3 Kopien der Daten · 2 = 2 verschiedene Datenträger/Medien · 1 = 1 Backup an einem separaten Ort" },
+  // 71
+  { q:"Auf welche Backup-Strategie trifft zu: »Zur Wiederherstellung wird stets nur ein Backup benötigt.« (Wiederholung)", opts:["Vollbackup","Inkrementelles Backup","Differentielles Backup"], c:0 },
+  // 72
+  { q:"Auf welche Backup-Strategie trifft zu: »Diese Strategie hat den höchsten Speicherplatzbedarf.« (Wiederholung)", opts:["Vollbackup","Inkrementelles Backup","Differentielles Backup"], c:2 },
+  // 73
+  { q:"Auf welche Backup-Strategie trifft zu: »Es wurden drei Sicherungen für die Wiederherstellung benötigt.« (Wiederholung)", opts:["Vollbackup","Inkrementelles Backup","Differentielles Backup"], c:1 },
+  // 74 – Rechnung 40 %
+  { q:"Vollbackup Sonntag: 10 GB, Änderungen 40 %/Tag. Wie viel Speicher belegen 4 Tage mit Vollbackups (So, Mo, Di, Mi)?", opts:["30 GB","34 GB","40 GB","22 GB"], c:2, note:"So: 10, Mo: 10, Di: 10, Mi: 10 → 40 GB · Inkrementell: 10+4+4+4 = 22 GB · Differentiell: 10+4+8+12 = 34 GB" },
+  // 75 – DAS/SAN/NAS
+  { q:"Ordnen Sie: Welches Massenspeichersystem passt zu »Ein Server mit direkt angeschlossenem RAID-System«?", opts:["NAS","SAN","DAS","Cloud-Storage"], c:2, note:"DAS (Direct Attached Storage) = direkt an einen Server angeschlossen · NAS = netzwerkbasierter Fileserver · SAN = hochperformantes Netzwerk-Storage für viele Server" },
+  // 76 – maximaler RAID-Speicher mit 5 Platten
+  { q:"D1:1TB, D2:2TB, D3:3TB, D4:4TB, D5:5TB. Maximaler Nettospeicher bei RAID 0 (alle Platten)?", opts:["10 TB","12 TB","15 TB","5 TB"], c:2, note:"RAID 0: 1+2+3+4+5 = 15 TB · RAID 1: beste 2 Platten → 2×4TB → Netto 4 TB · RAID 5: beste 4 Platten (2+3+4+5) minus eine Paritätsplatte → 3×4=12 TB? Nein: (n-1) × kleinste = 3×2=6 TB bei optimaler Wahl D2-D3-D4 = 6 TB." },
+  // 77
+  { q:"Ein Unternehmen verwendet 10.0.0.0/24. Welche Adresse kann einem Client zugewiesen werden?", opts:["10.0.0.256","10.0.0.1","10.0.1.0","10.1.0.0"], c:1 },
+  // 78
+  { q:"Ein Client wird in Netzwerk 192.168.1.0/24 integriert. Welche IP-Adresse ist für den Client NICHT gültig?", opts:["192.168.1.100","192.168.1.255","192.168.2.1","192.168.1.1"], c:1, note:"192.168.1.255 ist die Broadcast-Adresse des Subnetzes und kann keinem Host zugewiesen werden." },
+  // 79
+  { q:"Ein Client verwendet IPv6. Welches Beispiel ist KEINE gültige IPv6-Adresse?", opts:["fe80::2f3a:56ff:fe74:3d2c","2001:0db8:85a3:0000:0000:8a2e:0370:7334","2001:0db8:85a3:0000:0000:8a2e:0370:7g34","fd00::2f3a:56ff:fe74:3d2c"], c:2, note:"»7g34« enthält ›g‹ – kein gültiges Hexadezimalzeichen." },
+  // 80
+  { q:"Welche Subnetzmaske ist für ein Standard-B-Klasse-Netzwerk geeignet?", opts:["255.0.0.0","255.255.0.0","255.255.255.0","255.255.255.255"], c:1 }
+];
+
+let questions = [...QUESTIONS];
+let current = 0, score = 0, wrong = 0, answered = false;
+
+function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
+
+function renderQ(){
+  answered = false;
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('progress-bar').style.width=`${(current/total)*100}%`;
+  document.getElementById('q-counter').textContent=`Frage ${current+1} von ${total}`;
+  document.getElementById('score-counter').innerHTML=`✓ ${score} &nbsp; ✗ ${wrong}`;
+  document.getElementById('q-number').textContent=`#${current+1}`;
+  document.getElementById('q-text').textContent=q.q;
+  const body=document.getElementById('q-body');
+  body.innerHTML='';
+  const optsDiv=document.createElement('div');
+  optsDiv.className='options';
+  q.opts.forEach((opt,i)=>{
+    const btn=document.createElement('button');
+    btn.className='option-btn';
+    btn.innerHTML=`<span class="opt-letter">${LETTERS[i]}</span><span>${opt}</span>`;
+    btn.onclick=()=>selectOption(i,btn,optsDiv,q);
+    optsDiv.appendChild(btn);
+  });
+  body.appendChild(optsDiv);
+  if(q.note){const n=document.createElement('div');n.className='note-box';n.innerHTML=`<strong>💡 Hinweis:</strong> ${q.note}`;body.appendChild(n);}
+  document.getElementById('btn-next').style.display='none';
+  const card=document.getElementById('question-card');
+  card.style.animation='none';void card.offsetWidth;card.style.animation='fadeUp 0.35s ease both';
+}
+
+function selectOption(idx,btn,optsDiv,q){
+  if(answered)return;
+  answered=true;
+  optsDiv.querySelectorAll('.option-btn').forEach(b=>b.disabled=true);
+  const ok=idx===q.c;
+  if(ok){btn.classList.add('correct');score++;}
+  else{btn.classList.add('wrong');optsDiv.querySelectorAll('.option-btn')[q.c].classList.add('correct');wrong++;}
+  const fb=document.createElement('div');
+  fb.className=ok?'answered-correct':'answered-wrong';
+  fb.textContent=ok?'✓ Richtig!':`✗ Falsch — Richtig wäre: ${LETTERS[q.c]}`;
+  optsDiv.parentNode.appendChild(fb);
+  document.getElementById('score-counter').innerHTML=`✓ ${score} &nbsp; ✗ ${wrong}`;
+  const btn_next=document.getElementById('btn-next');
+  btn_next.style.display='block';
+  if(current===questions.length-1)btn_next.textContent='Ergebnis anzeigen →';
+}
+
+function nextQ(){current++;if(current>=questions.length)showResult();else renderQ();}
+
+function showResult(){
+  document.getElementById('quiz-screen').style.display='none';
+  document.getElementById('result-screen').style.display='block';
+  const pct=Math.round((score/questions.length)*100);
+  document.getElementById('score-pct').textContent=pct+'%';
+  document.getElementById('res-correct').textContent=score;
+  document.getElementById('res-wrong').textContent=wrong;
+  document.getElementById('res-total').textContent=questions.length;
+  let t,s;
+  if(pct>=90){t='🏆 Ausgezeichnet!';s='Du hast die IT-Grundlagen voll drauf.';}
+  else if(pct>=75){t='🎉 Gut gemacht!';s='Nur noch ein paar Lücken zu schließen.';}
+  else if(pct>=50){t='📚 Weiter so!';s='Wiederhole die schwierigeren Themen nochmal.';}
+  else{t='💪 Nicht aufgeben!';s='Mehr Übung wird den Unterschied machen.';}
+  document.getElementById('result-title').textContent=t;
+  document.getElementById('result-sub').textContent=s;
+  const c=2*Math.PI*42;
+  const ring=document.getElementById('ring-fill');
+  ring.style.strokeDasharray=c;ring.style.strokeDashoffset=c;
+  const col=pct>=75?'var(--green)':pct>=50?'var(--accent)':'var(--red)';
+  ring.style.stroke=col;document.getElementById('score-pct').style.color=col;
+  setTimeout(()=>{ring.style.strokeDashoffset=c*(1-pct/100);},100);
+}
+
+function restartQuiz(){questions=[...QUESTIONS];current=0;score=0;wrong=0;document.getElementById('result-screen').style.display='none';document.getElementById('quiz-screen').style.display='block';document.getElementById('btn-next').textContent='Weiter →';renderQ();}
+function restartShuffle(){questions=shuffle([...QUESTIONS]);current=0;score=0;wrong=0;document.getElementById('result-screen').style.display='none';document.getElementById('quiz-screen').style.display='block';document.getElementById('btn-next').textContent='Weiter →';renderQ();}
+
+renderQ();
+</script>
+</body>
+</html>
