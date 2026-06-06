@@ -1019,7 +1019,7 @@ function renderQ(){
     btnNextNav.textContent = answered ? (current === questions.length - 1 ? 'Ergebnis anzeigen →' : 'Weiter →') : 'Antwort prüfen';
   } else {
     btnNext.style.display = answered ? 'block' : 'none';
-    btnNextNav.disabled = !answered;
+    btnNextNav.disabled = false;
     btnNext.disabled = !answered;
     btnNext.textContent = current === questions.length - 1 ? 'Ergebnis anzeigen →' : 'Weiter →';
     btnNextNav.textContent = current === questions.length - 1 ? 'Ergebnis anzeigen →' : 'Weiter →';
@@ -1080,6 +1080,8 @@ function handleNext() {
     if (correct) score++;
     else wrong++;
     renderQ();
+  } else {
+    nextQ();
   }
 }
 
