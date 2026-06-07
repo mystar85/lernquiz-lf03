@@ -1053,6 +1053,20 @@ const QUESTIONS = [
   opts: ["256 Subnetze, 256 Hosts pro Subnetz", "256 Subnetze, 254 Hosts pro Subnetz",  "512 Subnetze, 512 Hosts pro Subnetz", "512 Subnetze, 510 Hosts pro Subnetz"],
   c: 1,
 },
+// Q135
+{
+  type: "match",
+  q: "Ordnen Sie die Begriffe der richtigen Schicht im OSI Modell zu.",
+  left: ["Sicherungsschicht", "Vermittlungsschicht", "Transportschicht"],
+  right: ["IP Adresse", "Port", "MAC Adresse"],
+  ans: [[0, 2], [1, 0], [2, 1]],
+},
+// Q136
+{
+  q: "Was beschreibt die CIDR-Notation /32?",
+  opts: ["Ein Netzwerk mit 32 Subnetzen", "Eine einzelne Host-Adresse", "Ein Netzwerk mit 32 Hosts", "Ein Subnetz mit einer Maske von 255.255.255.0"],
+  c: 1,
+},
 ];
 
 const allQuestions = QUESTIONS.map((q, index) => ({ ...q, id: index }));
