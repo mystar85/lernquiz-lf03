@@ -84,6 +84,7 @@
     background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
     padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer;
     transition: border-color .2s, background .2s, transform .1s; text-align: left;
+    color: var(--text);
   }
   .match-item:hover:not(.locked) { border-color: var(--accent); background: rgba(108,99,255,0.08); }
   .match-item .match-index {
@@ -112,7 +113,7 @@
   .order-controls button:disabled { opacity: 0.35; cursor: not-allowed; }
   .option-btn {
     background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
-    color: var(--text); cursor: pointer; font-family: 'DM Mono', monospace; font-size: 0.88rem;
+    color: #fff; cursor: pointer; font-family: 'DM Mono', monospace; font-size: 0.88rem;
     padding: 14px 18px; text-align: left; transition: border-color .2s, background .2s, transform .1s;
     display: flex; align-items: flex-start; gap: 12px; line-height: 1.5; flex-wrap: wrap;
   }
@@ -127,6 +128,8 @@
   }
   .option-btn:hover:not(:disabled) { border-color: var(--accent); background: rgba(108,99,255,0.08); transform: translateX(3px); }
   .option-btn:hover:not(:disabled) .opt-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .option-btn.selected { border-color: var(--accent); background: rgba(108,99,255,0.14); }
+  .option-btn.selected .opt-letter { background: var(--accent); border-color: var(--accent); color: #fff; }
   .option-btn:disabled { cursor: not-allowed; }
   .option-btn.correct { border-color: var(--green); background: rgba(0,229,160,0.08); }
   .option-btn.correct .opt-letter { background: var(--green); border-color: var(--green); color: #fff; }
@@ -1069,6 +1072,7 @@ let wrong = 0;
 let answered = false;
 let correctAnswer = false;
 let selectedOption = null;
+let selectedOptions = [];
 let matchActive = null;
 let matchSelections = [];
 let orderState = [];
@@ -1078,15 +1082,27 @@ let currentMode = 'menu';
 function shuffle(a){const b=[...a];for(let i=b.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[b[i],b[j]]=[b[j],b[i]];}return b;}
 
 function saveFavorites(){ localStorage.setItem('quizFavorites', JSON.stringify([...favorites])); }
-function resetQuiz(){ current = 0; score = 0; wrong = 0; answered = false; correctAnswer = false; selectedOption = null; matchActive = null; matchSelections = []; orderState = []; }
+function resetQuiz(){
+  current = 0;
+  score = 0;
+  wrong = 0;
+  answered = false;
+  correctAnswer = false;
+  selectedOption = null;
+  selectedOptions = [];
+  matchActive = null;
+  matchSelections = [];
+  orderState = [];
+  questions.forEach(q => delete q.optionOrder);
+}
 function showMenu(){ currentMode = 'menu'; document.getElementById('menu-screen').style.display='block'; document.getElementById('quiz-screen').style.display='none'; document.getElementById('result-screen').style.display='none'; }
 function startQuiz(){ questions = [...allQuestions]; resetQuiz(); document.getElementById('menu-screen').style.display='none'; document.getElementById('quiz-screen').style.display='block'; renderQ(); }
 function startFavorites(){ const favs = allQuestions.filter(q => favorites.has(q.id)); if (!favs.length){ alert('Keine Favoriten gespeichert. Markiere zuerst Fragen als Favorit.'); return; } questions = favs; resetQuiz(); document.getElementById('menu-screen').style.display='none'; document.getElementById('quiz-screen').style.display='block'; renderQ(); }
 function toggleFavorite(){ const q = questions[current]; if (favorites.has(q.id)){ favorites.delete(q.id); } else { favorites.add(q.id); } saveFavorites(); renderQ(); }
-function prevQ(){ if (current === 0) return; current--; answered = false; correctAnswer = false; selectedOption = null; matchActive = null; matchSelections = []; orderState = []; renderQ(); }
+function prevQ(){ if (current === 0) return; current--; answered = false; correctAnswer = false; selectedOption = null; selectedOptions = []; matchActive = null; matchSelections = []; orderState = []; renderQ(); }
 
 function populateQuestionJump(){ const select = document.getElementById('question-jump-select'); if (!select) return; select.innerHTML = questions.map((_, i)=>`<option value="${i}">Frage ${i+1}</option>`).join(''); select.value = current; }
-function jumpToQuestion(index){ const idx = Number(index); if (Number.isNaN(idx) || idx<0 || idx>=questions.length) return; current = idx; answered = false; correctAnswer = false; selectedOption = null; matchActive = null; matchSelections = []; orderState = []; renderQ(); }
+function jumpToQuestion(index){ const idx = Number(index); if (Number.isNaN(idx) || idx<0 || idx>=questions.length) return; current = idx; answered = false; correctAnswer = false; selectedOption = null; selectedOptions = []; matchActive = null; matchSelections = []; orderState = []; renderQ(); }
 
 function renderQ(){
   const q = questions[current];
@@ -1177,21 +1193,39 @@ function renderQ(){
     }).join('');
     body.innerHTML = `<div class="order-list">${orderItems}</div>`;
   } else {
+    const isMulti = Array.isArray(q.c);
+    if (!q.optionOrder || q.optionOrder.length !== q.opts.length) {
+      q.optionOrder = shuffle(q.opts.map((_, i) => i));
+    }
     const optsDiv = document.createElement('div');
     optsDiv.className = 'options';
-    q.opts.forEach((opt, i) => {
+    q.optionOrder.forEach((optIndex, displayIndex) => {
+      const opt = q.opts[optIndex];
       const btn = document.createElement('button');
       btn.className = 'option-btn';
-      btn.innerHTML = `<span class="opt-letter">${LETTERS[i]}</span><span>${opt}</span>`;
+      btn.innerHTML = `<span class="opt-letter">${LETTERS[displayIndex]}</span><span>${opt}</span>`;
       btn.disabled = answered;
       if (answered) {
-        if (i === q.c) btn.classList.add('correct');
-        if (selectedOption === i && selectedOption !== q.c) btn.classList.add('wrong');
+        if (isMulti) {
+          if (q.c.includes(optIndex)) btn.classList.add('correct');
+          if (selectedOptions.includes(optIndex) && !q.c.includes(optIndex)) btn.classList.add('wrong');
+        } else {
+          if (optIndex === q.c) btn.classList.add('correct');
+          if (selectedOption === optIndex && selectedOption !== q.c) btn.classList.add('wrong');
+        }
+      } else if (isMulti && selectedOptions.includes(optIndex)) {
+        btn.classList.add('selected');
       }
-      btn.onclick = () => selectOption(i, q);
+      btn.onclick = () => selectOption(optIndex, q);
       optsDiv.appendChild(btn);
     });
     body.appendChild(optsDiv);
+    if (isMulti) {
+      const multiHint = document.createElement('div');
+      multiHint.className = 'note-box';
+      multiHint.innerHTML = '<strong>💡 Hinweis:</strong> Mehrere Antworten möglich. Markiere alle richtigen Optionen und klicke dann auf „Antwort prüfen“.'.replace(/„/g, '„').replace(/”/g, '“');
+      body.appendChild(multiHint);
+    }
   }
 
   if (q.note) {
@@ -1231,7 +1265,8 @@ function renderQ(){
         fb.textContent = '✓ Richtig!';
       } else {
         fb.className = 'answered-wrong';
-        fb.textContent = `✗ Falsch — Richtig wäre: ${LETTERS[q.c]}`;
+        const correctText = Array.isArray(q.c) ? q.c.map(i => LETTERS[i]).join(', ') : LETTERS[q.c];
+        fb.textContent = `✗ Falsch — Richtig wäre: ${correctText}`;
       }
     }
     body.appendChild(fb);
@@ -1242,8 +1277,12 @@ function renderQ(){
   btnFav.className = 'btn-nav favorite-button' + (favorites.has(q.id) ? ' active' : '');
   document.getElementById('btn-prev').disabled = current === 0;
 
+  const isMulti = Array.isArray(q.c);
   if (q.type === 'match' || q.type === 'order') {
     btnNextNav.disabled = q.type === 'match' && !matchSelections.every(v => v !== null) && !answered;
+    btnNextNav.textContent = answered ? (current === questions.length - 1 ? 'Ergebnis anzeigen →' : 'Weiter →') : 'Antwort prüfen';
+  } else if (isMulti) {
+    btnNextNav.disabled = !answered && selectedOptions.length === 0;
     btnNextNav.textContent = answered ? (current === questions.length - 1 ? 'Ergebnis anzeigen →' : 'Weiter →') : 'Antwort prüfen';
   } else {
     btnNextNav.disabled = false;
@@ -1258,6 +1297,13 @@ function renderQ(){
 
 function selectOption(idx, q) {
   if (answered) return;
+  if (Array.isArray(q.c)) {
+    const pos = selectedOptions.indexOf(idx);
+    if (pos === -1) selectedOptions.push(idx);
+    else selectedOptions.splice(pos, 1);
+    renderQ();
+    return;
+  }
   selectedOption = idx;
   answered = true;
   correctAnswer = idx === q.c;
@@ -1312,6 +1358,16 @@ function handleNext() {
     if (correct) score++;
     else wrong++;
     renderQ();
+  } else if (Array.isArray(q.c)) {
+    if (selectedOptions.length === 0) return;
+    const sortedSel = [...selectedOptions].sort((a, b) => a - b);
+    const sortedCor = [...q.c].sort((a, b) => a - b);
+    const correct = sortedSel.length === sortedCor.length && JSON.stringify(sortedSel) === JSON.stringify(sortedCor);
+    correctAnswer = correct;
+    answered = true;
+    if (correct) score++;
+    else wrong++;
+    renderQ();
   } else {
     nextQ();
   }
@@ -1324,6 +1380,7 @@ function nextQ() {
     answered = false;
     correctAnswer = false;
     selectedOption = null;
+    selectedOptions = [];
     matchActive = null;
     matchSelections = [];
     orderState = [];
