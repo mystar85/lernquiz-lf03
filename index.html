@@ -183,6 +183,7 @@
       <div class="options">
         <button class="option-btn" type="button" onclick="startQuiz()">Quiz starten</button>
         <button class="option-btn" type="button" onclick="startFavorites()">Favoriten üben</button>
+        <button class="option-btn" type="button" onclick="restartShuffle()">Zufällige Reihenfolge</button>
       </div>
     </div>
   </div>
@@ -1412,7 +1413,7 @@ function showResult() {
 }
 
 function restartQuiz() { questions = [...allQuestions]; resetQuiz(); document.getElementById('result-screen').style.display = 'none'; document.getElementById('quiz-screen').style.display = 'block'; document.getElementById('btn-next-nav').textContent = 'Weiter →'; renderQ(); }
-function restartShuffle() { questions = shuffle([...allQuestions]); resetQuiz(); document.getElementById('result-screen').style.display = 'none'; document.getElementById('quiz-screen').style.display = 'block'; document.getElementById('btn-next-nav').textContent = 'Weiter →'; renderQ(); }
+function restartShuffle() { questions = shuffle([...allQuestions]); resetQuiz(); document.getElementById('menu-screen').style.display = 'none'; document.getElementById('result-screen').style.display = 'none'; document.getElementById('quiz-screen').style.display = 'block'; document.getElementById('btn-next-nav').textContent = 'Weiter →'; renderQ(); }
 
 document.getElementById('btn-next-nav').onclick = handleNext;
 showMenu(); renderQ();
