@@ -922,13 +922,132 @@ const QUESTIONS = [
   opts: ["Eine VPN aktivieren", "Ein Antivirus-Programm installieren", "Den Port 443 in der Firewall freigeben", "Eine feste IP-Adresse einrichten"],
   c: 2,
 },
-// Q15
+// Q115
 {
   type: "match",
   q: "Ordnen Sie zu...",
   left: ["Edge Computing", "Fog Computing"],
   right: ["Findet zwischen Cloud und Endgeräten statt", "Findet dort statt wo die Daten erzeugt werden"],
   ans: [[0, 1], [1, 0]],
+},
+// Q116
+{
+  q: "Was kennzeichnet private Netzwe?",
+  opts: ["Verwendung öffentlicher IP-Adressen", "Weiterleitung von Paketen mit privaten IP-Adressen im Internet", "Externe Verantwortung für private Netzwerke", "Nutzung durch Unternehmen, Behörden, Schulen, Hochschulen, Privathaushalte"],
+  c: 3,
+},
+// Q117
+{
+  q: "Was kann ein externes Rechenzentrum sein?",
+  opts: ["Ein Serverraum", "Ein Rechenzentrum im Internet", "Ein eigenständiges Netz außerhalb des Internets", "Ein Klimatisierungsraum"],
+  c: 1,
+},
+// Q118
+{
+  q: "Welche Dienstleistungen bieten RZ-Profis in bedarfsgerecht angemieteten Cloud-Systemen?",
+  opts: ["Kaffeeservice und Reinigung", "Datensicherung und Klimatisierung", "Brandschutz und Zutrittsberechtigungen", "Internetanbindung und Colocation"],
+  c: 1,
+},
+// Q119
+{
+  q: "Was übernimmt der Colocation-Anbieter im Rechenzentrum?",
+  opts: ["Die allgemeinen Sicherheitsanforderungen wie Brandschutz und Zutrittsberechtigungen", "Die Anbindung an das LAN", "Die Datensicherung", "Die Bereitstellung von Anwenderprogrammen"],
+  c: 0,
+},
+// Q120
+{
+  type: "order",
+  q: "Bei der Übertragung eines Ethernet Frames werden nacheinander bestimmte Informationen über das Übertragungsmedium gesendet. Bringen Sie die Informationen in die richtige Reihenfolge.",
+  opts: ["Destination Address", "Frame Check Sequence", "Type", "Synchronization", "Source Address", "Data"],
+  order: [3, 0, 4, 2, 5, 1],
+},
+// Q121
+{
+  q: "Wieviele verschiedene (einzigartige) IPv4 Adressen gibt es insgesamt?",
+  opts: ["4149572618", "4319573950", "4294967296", "4482956193", "4732480824"],
+  c: 2,
+},
+// Q122
+{
+  type: "match",
+  q: "Ordnen Sie die Portnummern ihren Bezeichnungen zu.",
+  left: ["Portnummern 0 bis 1023", "Portnummern 1024 bis 49151"],
+  right: ["Registered Ports", "Well-known Ports"],
+  ans: [[0, 1], [1, 0]],
+},
+// Q123
+{
+  q: "Was passiert, wenn ein UDP-Paket verloren geht?",
+  opts: ["Es wird automatisch neu gesendet", "Es wird ignoriert.", "Der Empfänger fordert eine Wiederholung an.", "Das gesamte Datenpaket wird verworfen."],
+  c: 1,
+},
+// Q124
+{
+  q: "Welches Kabel wird üblicherweise für die horizontale Verkabelung verwendet?",
+  opts: ["Koaxialkabel", "Singlemode-Glasfaserkabe", "Kategorie 5e oder höher", "Stromkabel"],
+  c: 2,
+},
+// Q125
+{
+  q: "Was ist ein Proxy-Server und wofür wird er verwendet?",
+  opts: ["Zur Beschleunigung der Internetverbindung", "Zur Erhöhung der Netzwerksicherheit", "Zur Speicherung von Dateien", "Zur Vermittlung zwischen Client und Internet"],
+  c: 3,
+},
+// Q126
+{
+  q: "Wie können Niederlassungsnetze über VPN-Verbindungen versorgt werden?",
+  opts: ["Durch angemietete Leitungen (Kupfer oder Lichtwellenleiter)", "Durch Spiegelung der Daten zwischen den Rechenzentren", "Durch Verzicht auf VPN-Verbindungen", "Durch externe Cloud-Services"],
+  c: 0,
+},
+// Q127
+{
+  q: "Was ist die Funktion des Interframe Gap?",
+  opts: ["Anzeige von Übertragungsfehlern", "Trennung von Header und Payload", "Zeitabstand zwischen Frames zur Kollisionsvermeidung", "Signalisierung des Frame-Endes"],
+  c: 2,
+},
+// Q128
+{
+  q: "Warum wird UDP manchmal für VoIP-Anwendungen verwendet?",
+  opts: ["Weil es eine sequenzielle Übertragung garantiert.", "Weil es eine geringere Latenz hat.", "Weil es eine Verbindung aufbaut.", "Weil es eine zuverlässige Übertragung bietet"],
+  c: 1,
+},
+// Q129
+{
+  type: "match",
+  q: "Ordnen Sie die Schichten des OSI-Modells zu.",
+  left: ["Transportschicht", "Präsentationsschicht", "Anwendungsschicht", "Sitzungsschicht", "Bitübertragungsschicht", "Vermittlungsschicht", "Sicherungsschicht"],
+  right: ["Schicht 7", "Schicht 6", "Schicht 5", "Schicht 4", "Schicht 3", "Schicht 2", "Schicht 1"],
+  ans: [[2, 0], [1, 1], [3, 2], [0, 3], [5, 4], [6, 5], [4, 6]],
+},
+// Q130
+{
+  q: "Welche Aussagen über die Broadcastadresse sind richtig?",
+  opts: ["Ist reserviert und darf nicht an Clients vergeben werden", "Wird für Sendungen an alle Hosts verwendet.", "Darf mehrmals vergeben werden.", "Darf nur einmal vergeben werden.", "Dient der Identifizierung der Netzwerkkarte."],
+  c: [0,1,3]
+},
+// Q131
+{
+  q: "Welche OSI-Schicht ist für die Fehlererkennung und -korrektur verantwortlich?",
+  opts: ["Bitübertragungsschicht", "Sicherungsschicht", "Vermittlungsschicht", "Transportschicht"],
+  c: 1,
+},
+// Q132
+{
+  q: "Was ist der Zweck der Unique Local Addresses (ULA) in IPv6?",
+  opts: ["Sie ermöglichen die Kommunikation über das Internet.", "Sie dienen als Ersatz für öffentliche IP-Adressen.", "Sie bieten eine Möglichkeit für private Netzwerke, Adressen zu verwenden, ohne mit dem globalen Adressraum zu kollidieren", "Sie identifizieren Geräte eindeutig weltweit."],
+  c: 2,
+},
+// Q133
+{
+  q: "Welche Topologie verwendet das Ethernet-Protokoll typischerweise?",
+  opts: ["Ringtopologie", "Maschentopologie", "Sterntopologie", "Baumtopologie"],
+  c: 2,
+},
+// Q134
+{
+  q: "Wie viele Subnetze und Hosts pro Subnetz sind in einem /16 Netzwerk mit /24 Subnetzen verfügbar?",
+  opts: ["256 Subnetze, 256 Hosts pro Subnetz", "256 Subnetze, 254 Hosts pro Subnetz",  "512 Subnetze, 512 Hosts pro Subnetz", "512 Subnetze, 510 Hosts pro Subnetz"],
+  c: 1,
 },
 ];
 
