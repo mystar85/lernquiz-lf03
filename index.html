@@ -568,7 +568,7 @@ const QUESTIONS = [
 {
   q: "Welcher IPv6-Adresstyp wird hauptsächlich für die Kommunikation innerhalb eines lokalen Netzwerkes verwendet?",
   opts: ["Global Unicast", "Link-Local", "Site-Local", "Unique Local Address (ULA)"],
-  c: 2,
+  c: 1,
 },
 // 58
 {
@@ -717,8 +717,6 @@ const QUESTIONS = [
   opts: ["Kaffeemaschine und bequeme Stühle", "Sichere Stromversorgung, effiziente Klimatisierung, zuverlässige Anbindung an LAN und Internet", "Farbenfrohe Bürodekoration", "Große Fenster für Tageslicht"],
   c: 1,
 },
-
-
 // Q82
 {
   q: "Was ist ein PAN?",
@@ -911,6 +909,26 @@ const QUESTIONS = [
   left: ["SaaS", "Paas", "IaaS", "EaaS/AaaS/XaaS"],
   right: ["Stellt virtuelle Maschinen und Netzwerke über eine Cloud online zur Verfügung", "Stellt Anwendungssoftware online zur Verfügung", "Computerplattform bzw. Entwicklungsumgebung wird über eine Cloud online zur Verfügung gestellt", "Kombiniert eine verschiedene Cloud-Dienste"],
   ans: [[0, 1], [1, 2], [2, 0], [3, 3]],
+},
+// Q113
+{
+  q: "In welcher Topologie ist die Verkabelung am komplexesten?",
+  opts: ["Sterntopologie", "Ringtopologie", "Baumtopologie", "Maschentopologie"],
+  c: 3,
+},
+// Q114
+{
+  q: "Was muss ein Client tun, um eine Webseite über HTTPS aufzurufen?",
+  opts: ["Eine VPN aktivieren", "Ein Antivirus-Programm installieren", "Den Port 443 in der Firewall freigeben", "Eine feste IP-Adresse einrichten"],
+  c: 2,
+},
+// Q15
+{
+  type: "match",
+  q: "Ordnen Sie zu...",
+  left: ["Edge Computing", "Fog Computing"],
+  right: ["Findet zwischen Cloud und Endgeräten statt", "Findet dort statt wo die Daten erzeugt werden"],
+  ans: [[0, 1], [1, 0]],
 },
 ];
 
